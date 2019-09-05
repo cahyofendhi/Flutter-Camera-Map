@@ -5,6 +5,11 @@ import 'package:map/helpers/location_helper.dart';
 import 'package:map/screens/map_screen.dart';
 
 class LocationInput extends StatefulWidget {
+
+  final Function onSelectPlace;
+
+  LocationInput(this.onSelectPlace);
+
   @override
   _LocationInputState createState() => _LocationInputState();
 }
@@ -12,7 +17,6 @@ class LocationInput extends StatefulWidget {
 class _LocationInputState extends State<LocationInput> {
   String _previewImageUrl;
   LatLng _locationPreview;
-  // Declare outside build method
   GoogleMapController mapController;
 
   Future<void> _getCurrentLocation() async {
@@ -23,6 +27,7 @@ class _LocationInputState extends State<LocationInput> {
       _previewImageUrl = staticMapImageUrl;
       _locationPreview = LatLng(locData.latitude, locData.longitude);
     });
+    widget.onSelectPlace(locData.latitude, locData.longitude);
   }
 
   Future<void> _selectOnMap() async {
@@ -46,6 +51,7 @@ class _LocationInputState extends State<LocationInput> {
       ),
     );
     print('Location : ${selectedLocation.latitude}');
+    widget.onSelectPlace(selectedLocation.latitude, selectedLocation.longitude);
   }
 
   @override
@@ -58,7 +64,7 @@ class _LocationInputState extends State<LocationInput> {
           alignment: Alignment.center,
           decoration:
               BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
-          child: _previewImageUrl == null
+          child: _locationPreview == null
               ? Text(
                   'No Location Choosen',
                   textAlign: TextAlign.center,
@@ -74,7 +80,7 @@ class _LocationInputState extends State<LocationInput> {
                     ),
                     zoom: 16,
                   ),
-                  markers: _previewImageUrl == null
+                  markers: _locationPreview == null
                       ? null
                       : {
                           Marker(
