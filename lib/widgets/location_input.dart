@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:map/helpers/location_helper.dart';
 import 'package:map/screens/map_screen.dart';
 
@@ -10,6 +11,9 @@ class LocationInput extends StatefulWidget {
 
 class _LocationInputState extends State<LocationInput> {
   String _previewImageUrl;
+  LatLng _locationPreview;
+  // Declare outside build method
+  GoogleMapController mapController;
 
   Future<void> _getCurrentLocation() async {
     final locData = await Location().getLocation();
@@ -17,19 +21,31 @@ class _LocationInputState extends State<LocationInput> {
         latitude: locData.latitude, longitude: locData.longitude);
     setState(() {
       _previewImageUrl = staticMapImageUrl;
+      _locationPreview = LatLng(locData.latitude, locData.longitude);
     });
   }
 
   Future<void> _selectOnMap() async {
-    final selectedLocation = Navigator.of(context).push(
+    final selectedLocation = await Navigator.of(context).push<LatLng>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (ctx) => MapScreen(),
+        builder: (ctx) => MapScreen(
+          isSelecting: true,
+        ),
       ),
     );
     if (selectedLocation == null) {
       return;
     }
+    setState(() {
+      _locationPreview = selectedLocation;
+    });
+    mapController.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: _locationPreview, zoom: 20.0),
+      ),
+    );
+    print('Location : ${selectedLocation.latitude}');
   }
 
   @override
@@ -47,11 +63,30 @@ class _LocationInputState extends State<LocationInput> {
                   'No Location Choosen',
                   textAlign: TextAlign.center,
                 )
-              : Image.network(
-                  _previewImageUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
+              : GoogleMap(
+                  onMapCreated: (GoogleMapController controller) {
+                    mapController = controller;
+                  },
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(
+                      _locationPreview.latitude,
+                      _locationPreview.longitude,
+                    ),
+                    zoom: 16,
+                  ),
+                  markers: _previewImageUrl == null
+                      ? null
+                      : {
+                          Marker(
+                              markerId: MarkerId('m1'),
+                              position: _locationPreview),
+                        },
                 ),
+          // : Image.network(
+          //     _previewImageUrl,
+          //     fit: BoxFit.cover,
+          //     width: double.infinity,
+          //   ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
