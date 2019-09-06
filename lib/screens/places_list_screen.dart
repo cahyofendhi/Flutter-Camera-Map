@@ -3,6 +3,8 @@ import 'package:map/providers/great_places.dart';
 import 'package:map/screens/add_place_screen.dart';
 import 'package:provider/provider.dart';
 
+import 'place_detail_screen.dart';
+
 class PlacesListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -40,7 +42,13 @@ class PlacesListScreen extends StatelessWidget {
                                 FileImage(greatePlace.items[index].image),
                           ),
                           title: Text(greatePlace.items[index].title),
-                          onTap: () {},
+                          subtitle:
+                              Text(greatePlace.items[index].location.address),
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                                PlaceDetailScreen.routename,
+                                arguments: greatePlace.items[index].id);
+                          },
                         ),
                       ),
               ),
