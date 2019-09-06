@@ -19,9 +19,42 @@ class ImageInput extends StatefulWidget {
 class _ImageInputState extends State<ImageInput> {
   File _storedImage;
 
-  Future<void> _takePicker() async {
+  void _takeImage(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return SimpleDialog(
+          title: Text('Select Image'),
+          children: <Widget>  [
+            SimpleDialogOption(
+            onPressed: () { 
+              _takePicker(ImageSource.camera);
+              Navigator.pop(context); 
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(top: 5, bottom: 5),
+              child: const Text('Camera'),
+            ),
+          ),
+          SimpleDialogOption(
+            onPressed: () {
+              _takePicker(ImageSource.gallery);
+              Navigator.pop(context); 
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(top: 5, bottom: 5),
+              child: const Text('Gallery'),
+            ),
+          ),
+          ],
+        );
+      }
+    );
+  }
+
+  Future<void> _takePicker(ImageSource soureType) async {
     final imageFile = await ImagePicker.pickImage(
-      source: ImageSource.gallery,
+      source: soureType,
       maxWidth: 600
     );
     if (imageFile == null) {
@@ -67,7 +100,7 @@ class _ImageInputState extends State<ImageInput> {
             icon: Icon(Icons.camera),
             label: Text('Take Picture'),
             textColor: Theme.of(context).primaryColor,
-            onPressed: _takePicker,
+            onPressed: () => _takeImage(context),
           ),
         ),
       ],
