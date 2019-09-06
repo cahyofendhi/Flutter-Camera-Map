@@ -30,16 +30,16 @@ class GreatPlaces with ChangeNotifier {
       title: pickedTitle,
       location: updatedLocation,
     );
-    _items.add(newPlace);
-    notifyListeners();
-    DBHelper.insert('user_places', {
+    await DBHelper.insert('user_places', {
       'id': newPlace.id,
       'title': newPlace.title,
       'image': newPlace.image.path,
-      'lat': newPlace.location.latitude,
-      'lng': newPlace.location.longitude,
+      'loc_lat': newPlace.location.latitude,
+      'loc_lng': newPlace.location.longitude,
       'address': newPlace.location.address,
     });
+    _items.add(newPlace);
+    notifyListeners();
   }
 
   Future<void> fetchAndSetPlaces() async {
@@ -60,4 +60,9 @@ class GreatPlaces with ChangeNotifier {
         .toList();
     notifyListeners();
   }
+
+  Place findById(String id) {
+    return _items.firstWhere((place) => place.id == id);
+  }
+
 }
